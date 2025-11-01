@@ -1,0 +1,88 @@
+# ========================
+#  GLOBAL IGNORES
+# ========================
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.swp
+*.swo
+*.bak
+
+# ========================
+#  FLUTTER / GUI (gui/)
+# ========================
+/gui/build/
+/gui/.dart_tool/
+/gui/.packages
+/gui/.flutter-plugins
+/gui/.flutter-plugins-dependencies
+/gui/ios/Flutter/flutter_export_environment.sh
+/gui/ios/Pods/
+/gui/ios/.symlinks/
+/gui/ios/Runner/GeneratedPluginRegistrant.*
+/gui/android/.gradle/
+/gui/android/app/debug/
+/gui/android/app/profile/
+/gui/android/app/release/
+/gui/pubspec.lock
+
+# Avoid committing env variables for Flutter web (if you use them)
+gui/lib/env.dart
+
+# ========================
+#  FASTAPI / PYTHON (fastapi/)
+# ========================
+/fastapi/__pycache__/
+/fastapi/.pytest_cache/
+/fastapi/.ruff_cache/
+/fastapi/*.pyc
+/fastapi/*.pyo
+/fastapi/*.pyd
+/fastapi/env/
+/fastapi/venv/
+/fastapi/.env
+
+# virtual envs anywhere
+venv/
+env/
+.env
+
+# ========================
+#  NEO4J (neo4j/)
+# ========================
+/neo4j/data/
+/neo4j/logs/
+/neo4j/import/
+/neo4j/plugins/
+/neo4j/conf/
+
+# ========================
+#  DOCKER
+# ========================
+/docker-data/
+/**/.dockerignore
+
+# Docker sensitive configs
+*.pem
+*.crt
+*.key
+
+# ========================
+#  SYSTEM / IDE
+# ========================
+.vscode/
+.idea/
+*.iml
+
+# jetbrains / vs code cache
+/.fleet/
+**/.history
+.svn/
+
+# ========================
+#  BACKUP FILES
+# ========================
+*.old
+*.save
+*.backup
