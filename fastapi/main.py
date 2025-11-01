@@ -1,50 +1,66 @@
 from fastapi import FastAPI, HTTPException
-from neo4j_main import insert_trisensor
-import httpx
 import os
+import requests
+from neo4j import GraphDatabase
 
 app = FastAPI()
 
+HA_URL = os.getenv("HA_URL")
 HA_TOKEN = os.getenv("HA_TOKEN")
-HA_URL = "http://192.168.1.23:8123/api"  # <-- PAS ENTRE GUILLEMETS AVEC { }
+
+driver = GraphDatabase.driver(
+    os.getenv("NEO4J_URI"),
+    auth=(os.getenv("NEO4J_USER"), os.getenv("NEO4J_PASSWORD"))
+)
 
 @app.get("/trisensors")
-async def get_trisensors():
+def get_trisensors():
+    """Récupère uniquement les TriSensors depuis Home Assistant"""
     headers = {
         "Authorization": f"Bearer {HA_TOKEN}",
-        "Content-Type": "application/json",
+        "Content-Type": "application/json"
     }
 
     try:
-        async with httpx.AsyncClient() as client:
-            response = await client.get(f"{HA_URL}/states", headers=headers)
+        response = requests.get(f"{HA_URL}/api/states", headers=headers)
+        response.raise_for_status()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Home Assistant error: {e}")
 
-        data = response.json()
-        print(data)  # <- debug
+    states = response.json()
 
-        devices = []
+    trisensors = []
 
-        for entity in data:
-            if entity["entity_id"].startswith("sensor.") and any(
-                key in entity["attributes"].get("friendly_name", "").lower()
-                for key in ["temperature", "lumin", "motion"]
-            ):
-                devices.append({
-                    "id": entity["entity_id"],
-                    "name": entity["attributes"].get("friendly_name"),
-                    "value": entity["state"],
-                    "unit": entity["attributes"].get("unit_of_measurement"),
-                })
-        for s in devices:
-            insert_trisensor(
-                s["id"],
-                s["name"],
-                s["value"],
-                s["unit"]
+    for entity in states:
+        if (
+            entity["entity_id"].startswith("sensor.sensor_")
+            and ("air_temperature" in entity["entity_id"] or "illuminance" in entity["entity_id"])
+        ):
+            trisensors.append({
+                "id": entity["entity_id"],
+                "name": entity["attributes"].get("friendly_name"),
+                "value": entity["state"],
+                "unit": entity["attributes"].get("unit_of_measurement"),
+            })
+
+    return {"trisensors": trisensors}
+
+@app.get("/sync_trisensors")
+@app.post("/sync_trisensors")
+def sync_to_neo4j():
+    """Importe les capteurs dans Neo4j"""
+    trisensors = get_trisensors()["trisensors"]
+
+    with driver.session() as session:
+        for sensor in trisensors:
+            session.run(
+                """
+                MERGE (t:TriSensor {id: $id})
+                SET t.name = $name, t.value = $value, t.unit = $unit
+                """,
+                id=sensor["id"], name=sensor["name"], value=sensor["value"], unit=sensor["unit"]
             )
 
-        return {"trisensors": devices}
+    return {"status": "ok", "imported": len(trisensors)}
 
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erreur Home Assistant: {str(e)}")
 

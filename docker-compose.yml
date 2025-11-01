@@ -10,8 +10,12 @@ services:
       - "7687:7687"   # Bolt (connexion avec FastAPI)
     environment:
       - NEO4J_AUTH=neo4j/davdu815
+      - NEO4J_PLUGINS=["apoc", "n10s"]
+      - NEO4J_dbms_security_procedures_unrestricted=n10s.*,apoc.*
+      - NEO4J_dbms_security_procedures_allowlist=n10s.*,apoc.*
     volumes:
       - ./neo4j/data:/data
+      - ./ontology:/var/lib/neo4j/import  # Permet d'importer home.owl
 
   fastapi:
     build: ./fastapi
