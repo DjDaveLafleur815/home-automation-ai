@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'trisensor_view.dart';
+import 'ia_view.dart';
+import 'homeassistant_view.dart';
+import 'settings_view.dart';
 
 class Dashboard extends StatelessWidget {
   const Dashboard({super.key});
@@ -17,22 +21,48 @@ class Dashboard extends StatelessWidget {
         crossAxisCount: 2,
         padding: const EdgeInsets.all(16),
         children: [
-          _dashboardCard(Icons.sensors, "Capteurs"),
-          _dashboardCard(Icons.insights, "IA & Ontologie"),
-          _dashboardCard(Icons.home, "Home Assistant"),
-          _dashboardCard(Icons.settings, "Configuration"),
+          _dashboardCard(
+            context,
+            Icons.sensors,
+            "Capteurs",
+            const TriSensorView(),
+          ),
+          _dashboardCard(
+            context,
+            Icons.insights,
+            "IA & Ontologie",
+            const IAView(),
+          ),
+          _dashboardCard(
+            context,
+            Icons.home,
+            "Home Assistant",
+            const HomeAssistantView(),
+          ),
+          _dashboardCard(
+            context,
+            Icons.settings,
+            "Configuration",
+            const SettingsView(),
+          ),
         ],
       ),
     );
   }
 
-  Widget _dashboardCard(IconData icon, String label) {
+  Widget _dashboardCard(
+    BuildContext context,
+    IconData icon,
+    String label,
+    Widget page,
+  ) {
     return Card(
       color: const Color(0xFF161B22),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: InkWell(
         borderRadius: BorderRadius.circular(20),
-        onTap: () {},
+        onTap: () =>
+            Navigator.push(context, MaterialPageRoute(builder: (_) => page)),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
