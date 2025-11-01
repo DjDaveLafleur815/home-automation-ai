@@ -25,7 +25,7 @@ class Dashboard extends StatelessWidget {
             context,
             Icons.sensors,
             "Capteurs",
-            const TriSensorView(),
+            const TrisensorView(),
           ),
           _dashboardCard(
             context,
