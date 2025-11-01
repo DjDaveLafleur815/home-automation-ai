@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from neo4j_main import insert_trisensor
 import httpx
 import os
 
@@ -34,6 +35,13 @@ async def get_trisensors():
                     "value": entity["state"],
                     "unit": entity["attributes"].get("unit_of_measurement"),
                 })
+        for s in devices:
+            insert_trisensor(
+                s["id"],
+                s["name"],
+                s["value"],
+                s["unit"]
+            )
 
         return {"trisensors": devices}
 
